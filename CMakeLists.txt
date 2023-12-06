@@ -5,3 +5,5 @@ set(CMAKE_CXX_STANDARD 14)
 
 add_executable(study_nn1_simple_perceptron study_nn1_simple_perceptron.cpp)
 add_executable(study_nn2_matrix study_nn2_matrix.cpp)
+
+add_executable(study_nn3_simple_perception_backpropagation study_nn3_simple_perception_backpropagation.cpp)
