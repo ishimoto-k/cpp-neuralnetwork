@@ -7,3 +7,7 @@ add_executable(study_nn1_simple_perceptron study_nn1_simple_perceptron.cpp)
 add_executable(study_nn2_matrix study_nn2_matrix.cpp)
 
 add_executable(study_nn3_simple_perception_backpropagation study_nn3_simple_perception_backpropagation.cpp)
+
+add_executable(study_nn4_multi_perceptron_backpropagation
+        study_nn4_multi_perceptron_backpropagation.cpp
+        matrix/Matrix.hpp)

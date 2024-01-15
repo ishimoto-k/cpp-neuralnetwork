@@ -13,7 +13,7 @@ double sigmoid_derivative(double x){
   return x * (1.0 - x);
 }
 
-double norm(std::vector<double> weights, std::vector<double> inputs){
+double pro(std::vector<double> weights, std::vector<double> inputs){
   double ans = 0;
   for(int i = 0; i < weights.size(); i++){
     ans += weights[i] * inputs[i];
@@ -42,7 +42,7 @@ int main() {
       const double teacher = teacher_output[pattern_i];
 
       //forward
-      double output = activation_function(norm(weights, inputs));
+      double output = activation_function(pro(weights, inputs));
 
       //backward
       double error = teacher - output;
@@ -65,6 +65,6 @@ int main() {
     }
     inputs.push_back(bias);
 
-    std::cout << "output: " << activation_function(norm(weights, inputs)) << std::endl;
+    std::cout << "output: " << activation_function(pro(weights, inputs)) << std::endl;
   }
 }
