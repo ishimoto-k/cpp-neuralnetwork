@@ -20,7 +20,7 @@ public:
     std::mt19937 gen(rd());
 
     // 範囲指定（0.0から1.0までの実数）
-    std::uniform_real_distribution<double> dist(0.0, 1.0);
+    std::uniform_real_distribution<double> dist(-1.0, 1.0);
     std::vector<std::vector<double>> e;
     for(int i = 0; i<cols; i++){
       std::vector<double> vector;
