@@ -15,4 +15,9 @@ add_executable(study_nn4_multi_perceptron_backpropagation
 add_executable(study_nn5_mnist
         study_nn5_mnist.cpp
         matrix/Matrix.hpp)
+
+
+add_executable(study_nn6_convNN
+        study_nn6_convNN.cpp
+        matrix/Matrix.hpp)
 #target_link_libraries(study_nn5_mnist libpng)
