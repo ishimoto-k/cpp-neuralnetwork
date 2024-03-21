@@ -39,4 +39,13 @@ add_executable(study_nn5_mnist
 add_executable(study_nn6_convNN
         study_nn6_convNN.cpp
         matrix/Matrix.hpp)
+target_link_libraries(study_nn6_convNN layer)
+
+
+add_executable(study_nn7_use_layer
+        study_nn7_use_layer.cpp
+        matrix/Matrix.hpp)
+target_link_libraries(study_nn7_use_layer layer)
+
+
 #target_link_libraries(study_nn5_mnist libpng)
