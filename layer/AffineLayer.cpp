@@ -22,5 +22,5 @@ Matrix AffineLayer::backward_(Matrix grad) {
 void AffineLayer::update_(Matrix grad) {
     auto d_weight_ = input_.t() * grad;
     weight_ = weight_ - learning_rate_ * d_weight_;
-    bias_ = bias_ - learning_rate_ * grad;
+    bias_ = bias_ - learning_rate_ * grad.sum(COL);
 }

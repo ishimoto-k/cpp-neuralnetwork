@@ -19,6 +19,10 @@ public:
   int x;
   int y;
 };
+enum VECTOR{
+  ROW,
+  COL
+};
 class MatrixSizeMismatchException : public std::exception {
   std::string msg_;
 public:
@@ -195,6 +199,12 @@ public:
     }
     return ret_matrix;
   }
+  Matrix operator -() {
+    Matrix ret = matrix_;
+    return (*this)([](double x){
+      return -x;
+    });
+  }
 
   Matrix operator +(const double& l){
     std::vector<std::vector<double>> ret_matrix;
@@ -216,9 +226,31 @@ public:
       return *this + l[0][0];
     }
     if(l.cols() != cols()){
+      if(l.rows() == rows() && l.cols() == 1){
+        std::vector<std::vector<double>> ret_matrix;
+        for(int r = 0; r < matrix_.size(); r++){
+          std::vector<double> vector;
+          for(int c = 0; c < matrix_[0].size(); c++){
+            vector.push_back(matrix_[r][c] + l.matrix_[0][c]);
+          }
+          ret_matrix.push_back(vector);
+        }
+        return ret_matrix;
+      }
       throw MatrixSizeMismatchException("");
     }
     if(l.rows() != rows()){
+      if(l.cols() == cols() && l.rows() == 1){
+        std::vector<std::vector<double>> ret_matrix;
+        for(int r = 0; r < matrix_.size(); r++){
+          std::vector<double> vector;
+          for(int c = 0; c < matrix_[0].size(); c++){
+            vector.push_back(matrix_[r][c] + l.matrix_[r][0]);
+          }
+          ret_matrix.push_back(vector);
+        }
+        return ret_matrix;
+      }
       throw MatrixSizeMismatchException("");
     }
     std::vector<std::vector<double>> ret_matrix;
@@ -232,34 +264,34 @@ public:
     return ret_matrix;
   }
   Matrix operator -(Matrix l) {
-    if(l.cols() == 1 && l.rows() == 1){
-      return *this - l[0][0];
-    }
-    if(l.cols() != cols()){
-      throw MatrixSizeMismatchException(std::to_string(l.cols()) + "," + std::to_string(cols()));
-    }
-    if(l.rows() != rows()){
-      throw MatrixSizeMismatchException(std::to_string(l.rows()) + "," + std::to_string(rows()));
-    }
+    return *this + (-l);
+  }
+
+  Matrix operator /(const Matrix& l) {
+    std::size_t cols = matrix_.size();
+    std::size_t rows = matrix_[0].size();
+    std::size_t l_cols = l.matrix_.size();
+    std::size_t l_rows = l.matrix_[0].size();
     std::vector<std::vector<double>> ret_matrix;
-    for (int r = 0; r < matrix_.size(); r++) {
+    for (int i = 0; i < cols; i++) {
       std::vector<double> vector;
-      for (int c = 0; c < matrix_[0].size(); c++) {
-        vector.push_back(matrix_[r][c] - l.matrix_[r][c]);
+      for (int j = 0; j < rows; j++) {
+        vector.push_back(matrix_[i][j] / l.matrix_[i%l_cols][j%l_rows]);
       }
       ret_matrix.push_back(vector);
     }
     return ret_matrix;
   }
-
   Matrix operator &(const Matrix& l) {
-    std::size_t cols1 = matrix_.size();
-    std::size_t rows1 = matrix_[0].size();
+    std::size_t cols = matrix_.size();
+    std::size_t rows = matrix_[0].size();
+    std::size_t l_cols = l.matrix_.size();
+    std::size_t l_rows = l.matrix_[0].size();
     std::vector<std::vector<double>> ret_matrix;
-    for (int i = 0; i < matrix_.size(); i++) {
+    for (int i = 0; i < cols; i++) {
       std::vector<double> vector;
-      for (int j = 0; j < matrix_[0].size(); j++) {
-        vector.push_back(l.matrix_[i][j] * matrix_[i][j]);
+      for (int j = 0; j < rows; j++) {
+        vector.push_back(matrix_[i][j] * l.matrix_[i%l_cols][j%l_rows]);
       }
       ret_matrix.push_back(vector);
     }
@@ -280,6 +312,46 @@ public:
     return m * scaler;
   }
 
+  Matrix sum(VECTOR vector){
+    if(vector == VECTOR::ROW){
+      Matrix ret(cols(), 1);
+      for(int col = 0; col < cols(); col++){
+        for(int i = 0; i < rows(); i++) {
+          ret[col][0] += matrix_[col][i];
+        }
+      }
+      return ret;
+    }
+    else if(vector == VECTOR::COL){
+      Matrix ret(1, rows());
+      for(int row = 0; row < rows(); row++){
+        for(int i = 0; i < cols(); i++) {
+          ret[0][row] += matrix_[i][row];
+        }
+      }
+      return ret;
+    }
+  }
+  Matrix mean(VECTOR vector){
+    if(vector == VECTOR::ROW){
+      Matrix ret(cols(), 1);
+      for(int col = 0; col < cols(); col++){
+        for(int i = 0; i < rows(); i++) {
+          ret[col][0] += matrix_[col][i]/matrix_[col].size();
+        }
+      }
+      return ret;
+    }
+    else if(vector == VECTOR::COL){
+      Matrix ret(1, rows());
+      for(int row = 0; row < rows(); row++){
+        for(int i = 0; i < cols(); i++) {
+          ret[0][row] += matrix_[i][row]/matrix_.size();
+        }
+      }
+      return ret;
+    }
+  }
   Matrix t(){
     // 行列のサイズ取得
     std::size_t rows = matrix_.size();
@@ -312,6 +384,40 @@ public:
       std::cout << std::endl;
     }
   }
+
+  void push_back(Matrix matrix){
+    if(matrix.cols() == 1){
+      if(rows() == matrix.rows()) {
+        matrix_.push_back(matrix[0]);
+      }else{
+        throw MatrixSizeMismatchException("");
+      }
+    }
+    else if(matrix.rows() == 1){
+      if(cols() == matrix.cols()) {
+        for(int i = 0; i<cols(); i++){
+          matrix_[i].push_back(matrix[i][0]);
+        }
+      }else{
+        throw MatrixSizeMismatchException("");
+      }
+    }
+  }
+  Matrix col(int index){
+    auto ret = std::vector<std::vector<double>>(1, std::vector<double>(rows(), 0));
+    for(int row = 0; row < rows(); row++){
+      ret[0][row] = matrix_[index][row];
+    }
+    return ret;
+  }
+  Matrix row(int index){
+    auto ret = std::vector<std::vector<double>>(cols(), std::vector<double>(1, 0));
+    for(int col = 0; col < cols(); col++){
+      ret[col][0] = matrix_[col][index];
+    }
+    return ret;
+  }
+
   // 行列の各行にアクセスするための operator[]
   std::vector<double>& operator[](std::size_t index) {
     return matrix_[index];

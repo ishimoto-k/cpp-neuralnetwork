@@ -8,6 +8,7 @@
 #include <sstream>
 #include <AffineLayer.hpp>
 #include <SigmoidLayer.hpp>
+#include <BatchNormalizeLayer.hpp>
 
 std::pair<std::vector<std::vector<double>>, std::vector<std::vector<double>>> read_csv(const std::string& file_name) {
   std::vector<std::vector<double>> data;
@@ -21,6 +22,7 @@ std::pair<std::vector<std::vector<double>>, std::vector<std::vector<double>>> re
   }
 
   int t = 0;
+  int count = 0;
   std::string line;
   while (std::getline(file, line)) {
     std::istringstream ss(line);
@@ -53,7 +55,7 @@ std::pair<std::vector<std::vector<double>>, std::vector<std::vector<double>>> re
     }
     teacher_data.push_back(teacher);
     data.push_back(tmp);
-//    break;
+    count ++;
   }
 
   return {data, teacher_data};
@@ -62,6 +64,14 @@ std::pair<std::vector<std::vector<double>>, std::vector<std::vector<double>>> re
 int main() {
 #define MIDDLE_NUM 128
 #define OUTPUT_NUM 10
+#define BATCH_SIZE 5
+  BatchNormalizeLayer batchNormalizeLayer(3, 2, 0.1);
+  Matrix matrix_in = std::vector<std::vector<double>>{{0,1,2}, {0,0.1,0.2}};
+  Matrix matrix_out = std::vector<std::vector<double>>{{0,0.1,0.1}, {-0.1,1,0.2}};
+  auto ret = batchNormalizeLayer.forward(matrix_in);
+  ret.printMatrix();
+  ret = batchNormalizeLayer.backward(matrix_out);
+  ret.printMatrix();
 
   auto r = read_csv(MNIST_TRAIN_PATH);
   const double learning_rate = 0.1;
@@ -73,35 +83,39 @@ int main() {
   //training
   for(int epoch = 0; epoch < r.first.size(); epoch++){
     std::cout << epoch << "/" << r.first.size() << std::endl;
-    Matrix teacher_input = std::vector<std::vector<double>>{r.first[epoch]};
-    Matrix teacher_output = std::vector<std::vector<double>>{r.second[epoch]};
-
-    for(int pattern_i = 0; pattern_i < teacher_input.cols(); pattern_i++){
-      Matrix inputs = Matrix(std::vector<std::vector<double>> {teacher_input[pattern_i]});
-      Matrix teacher = Matrix(std::vector<std::vector<double>>{teacher_output[pattern_i]});
-      std::cout << "teacher"; teacher.printMatrix();
-      //      std::cout << "inputs"; inputs.printMatrix();
-
-      //forward
-      auto affine_0 = affine_layer_0->forward(inputs);
-      auto sigmoid_0 = sigmoid_layer_0->forward(affine_0);
-      auto affine_1 = affine_layer_1->forward(sigmoid_0);
-      auto output = sigmoid_layer_1->forward(affine_1);
-      std::cout << "output"; output.printMatrix();
-
-
-      //backward
-      auto output_error = (output - teacher);
-      auto sigmoid_grad1 = sigmoid_layer_1->backward(output_error);
-      auto affine_grad1 = affine_layer_1->backward(sigmoid_grad1);
-      auto sigmoid_grad0 = sigmoid_layer_0->backward(affine_grad1);
-      auto finish = affine_layer_0->backward(sigmoid_grad0);
-
-      sigmoid_layer_1->update();
-      affine_layer_1->update();
-      sigmoid_layer_0->update();
-      affine_layer_0->update();
+    auto teacher_input = std::vector<std::vector<double>>{};
+    auto teacher_output = std::vector<std::vector<double>>{};
+    for(int batch = 0; batch < BATCH_SIZE; batch++){
+      teacher_input.push_back(r.first[epoch]);
+      teacher_output.push_back(r.second[epoch]);
+      epoch++;
     }
+    Matrix inputs = teacher_input;
+    Matrix teacher = teacher_output;
+
+    std::cout << "teacher"; teacher.printMatrix();
+    //      std::cout << "inputs"; inputs.printMatrix();
+
+    //forward
+    auto affine_0 = affine_layer_0->forward(inputs);
+    auto sigmoid_0 = sigmoid_layer_0->forward(affine_0);
+    auto affine_1 = affine_layer_1->forward(sigmoid_0);
+    auto output = sigmoid_layer_1->forward(affine_1);
+    std::cout << "output"; output.printMatrix();
+
+
+    //backward
+    auto output_error = (output - teacher);
+    auto sigmoid_grad1 = sigmoid_layer_1->backward(output_error);
+    auto affine_grad1 = affine_layer_1->backward(sigmoid_grad1);
+    auto sigmoid_grad0 = sigmoid_layer_0->backward(affine_grad1);
+    auto finish = affine_layer_0->backward(sigmoid_grad0);
+
+    sigmoid_layer_1->update();
+    affine_layer_1->update();
+    sigmoid_layer_0->update();
+    affine_layer_0->update();
+
   }
 
 
