@@ -9,6 +9,7 @@
 #include <AffineLayer.hpp>
 #include <SigmoidLayer.hpp>
 #include <BatchNormalizeLayer.hpp>
+#include <ReluLayer.hpp>
 
 std::pair<std::vector<std::vector<double>>, std::vector<std::vector<double>>> read_csv(const std::string& file_name) {
   std::vector<std::vector<double>> data;
@@ -66,12 +67,16 @@ int main() {
 #define OUTPUT_NUM 10
 #define BATCH_SIZE 5
   BatchNormalizeLayer batchNormalizeLayer(3, 2, 0.1);
-  Matrix matrix_in = std::vector<std::vector<double>>{{0,1,2}, {0,0.1,0.2}};
-  Matrix matrix_out = std::vector<std::vector<double>>{{0,0.1,0.1}, {-0.1,1,0.2}};
+  Matrix matrix_in = std::vector<std::vector<double>>{{0,1,-2}, {-1,0.1,0.2}};
+  Matrix matrix_out = std::vector<std::vector<double>>{{0,-0.1,0.1}, {-0.1,1,0.2}};
   auto ret = batchNormalizeLayer.forward(matrix_in);
   ret.printMatrix();
   ret = batchNormalizeLayer.backward(matrix_out);
   ret.printMatrix();
+
+  ReluLayer reluLayer(3);
+  reluLayer.forward(matrix_in).printMatrix();
+  reluLayer.backward(matrix_out).printMatrix();
 
   auto r = read_csv(MNIST_TRAIN_PATH);
   const double learning_rate = 0.1;

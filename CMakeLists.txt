@@ -20,7 +20,8 @@ set(CMAKE_CXX_STANDARD 14)
 add_library(layer STATIC
         layer/AffineLayer.cpp
         layer/SigmoidLayer.cpp
-        layer/BatchNormalizeLayer.cpp)
+        layer/BatchNormalizeLayer.cpp
+        layer/ReluLayer.cpp)
 target_include_directories(layer INTERFACE layer)
 
 add_executable(study_nn1_simple_perceptron study_nn1_simple_perceptron.cpp)
