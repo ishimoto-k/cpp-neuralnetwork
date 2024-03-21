@@ -1,7 +1,26 @@
 cmake_minimum_required(VERSION 3.23)
 project(study_nn)
 
+if(DEFINED MNIST_TRAIN_PATH)
+else()
+    set(MNIST_TRAIN_PATH \"../mnist_train.csv\")
+endif()
+message(MNIST_TRAIN_PATH = ${MNIST_TRAIN_PATH})
+add_compile_definitions(MNIST_TRAIN_PATH=\"${MNIST_TRAIN_PATH}\")
+
+if(DEFINED MNIST_TEST_PATH)
+else()
+    set(MNIST_TEST_PATH \"../mnist_test.csv\")
+endif()
+message(MNIST_TEST_PATH = ${MNIST_TEST_PATH})
+add_compile_definitions(MNIST_TEST_PATH=\"${MNIST_TEST_PATH}\")
+
 set(CMAKE_CXX_STANDARD 14)
+
+add_library(layer STATIC
+        layer/AffineLayer.cpp
+        layer/SigmoidLayer.cpp)
+target_include_directories(layer INTERFACE layer)
 
 add_executable(study_nn1_simple_perceptron study_nn1_simple_perceptron.cpp)
 add_executable(study_nn2_matrix study_nn2_matrix.cpp)

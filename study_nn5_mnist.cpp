@@ -68,7 +68,7 @@ int main() {
 #define INPUT_NUM 2
 #define MIDDLE_NUM 128
 #define OUTPUT_NUM 10
-  auto r = read_csv("mnist_train.csv");
+  auto r = read_csv(MNIST_TRAIN_PATH);
   const double learning_rate = 0.1;
   Matrix middle_weights = Matrix::Random(MIDDLE_NUM, r.first[0].size());
   Matrix middle_bias_weights = Matrix::Random(MIDDLE_NUM, 1);
@@ -121,7 +121,7 @@ int main() {
 
 
 
-  auto test = read_csv("mnist_test.csv");
+  auto test = read_csv(MNIST_TEST_PATH);
   for (int i=0; i<test.first.size(); i++){
     std::cout << i << "/" << test.first.size() << std::endl;
 
